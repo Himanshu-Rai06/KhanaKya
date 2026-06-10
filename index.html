@@ -1,1073 +1,180 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KhanaKya? — What Should We Eat</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>
-/* ── TOKENS ──────────────────────────────────── */
-:root {
-  --bg: #0a0a0f;
-  --bg2: #111118;
-  --bg3: #1a1a24;
-  --bg4: #22222f;
-  --surface: #1e1e2a;
-  --surface2: #252533;
-  --border: rgba(255,255,255,0.07);
-  --border2: rgba(255,255,255,0.12);
-  --text: #f0f0f5;
-  --text2: #9898b0;
-  --text3: #606078;
-  --accent: #7c6af7;
-  --accent2: #a394ff;
-  --accent-glow: rgba(124,106,247,0.15);
-  --green: #4ade80;
-  --green-bg: rgba(74,222,128,0.1);
-  --orange: #f97316;
-  --orange-bg: rgba(249,115,22,0.1);
-  --pink: #f472b6;
-  --pink-bg: rgba(244,114,182,0.1);
-  --yellow: #fbbf24;
-  --yellow-bg: rgba(251,191,36,0.1);
-  --blue: #60a5fa;
-  --blue-bg: rgba(96,165,250,0.1);
-  --teal: #2dd4bf;
-  --teal-bg: rgba(45,212,191,0.1);
-  --red: #f87171;
-  --radius: 12px;
-  --radius-sm: 8px;
-  --radius-lg: 16px;
-  --radius-xl: 20px;
-  --shadow: 0 4px 24px rgba(0,0,0,0.4);
-  --transition: 0.25s cubic-bezier(0.4,0,0.2,1);
-}
-[data-theme="light"] {
-  --bg: #f5f5fa;
-  --bg2: #ffffff;
-  --bg3: #ededf5;
-  --bg4: #e5e5f0;
-  --surface: #ffffff;
-  --surface2: #f8f8fc;
-  --border: rgba(0,0,0,0.07);
-  --border2: rgba(0,0,0,0.12);
-  --text: #1a1a2e;
-  --text2: #5c5c7a;
-  --text3: #9898b0;
-  --accent: #6c5ce7;
-  --accent2: #5a4ed4;
-  --accent-glow: rgba(108,92,231,0.1);
-  --green: #16a34a;
-  --green-bg: rgba(22,163,74,0.08);
-  --orange: #ea580c;
-  --orange-bg: rgba(234,88,12,0.08);
-  --pink: #db2777;
-  --pink-bg: rgba(219,39,119,0.08);
-  --yellow: #d97706;
-  --yellow-bg: rgba(217,119,6,0.08);
-  --blue: #2563eb;
-  --blue-bg: rgba(37,99,235,0.08);
-  --teal: #0d9488;
-  --teal-bg: rgba(13,148,136,0.08);
-  --red: #dc2626;
-  --shadow: 0 4px 24px rgba(0,0,0,0.08);
-}
-
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-body {
-  font-family: 'Inter', sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  min-height: 100vh;
-  transition: background var(--transition), color var(--transition);
-  -webkit-font-smoothing: antialiased;
-}
-
-/* ── HEADER ─────────────────────────────────── */
-.header {
-  position: sticky; top: 0; z-index: 100;
-  background: rgba(10,10,15,0.88);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--border);
-  padding: 0 24px;
-  display: flex; align-items: center; justify-content: space-between;
-  height: 58px;
-  transition: background var(--transition);
-}
-[data-theme="light"] .header { background: rgba(245,245,250,0.88); }
-.logo {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 20px; font-weight: 700;
-  background: linear-gradient(135deg, var(--accent2), var(--pink));
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  background-clip: text;
-  letter-spacing: -0.5px; cursor: default;
-}
-.logo span { font-weight: 400; opacity: 0.7; font-size: 13px; margin-left: 6px; letter-spacing: 0; }
-.header-right { display: flex; align-items: center; gap: 10px; }
-.icon-btn {
-  width: 36px; height: 36px; border-radius: 10px;
-  background: var(--surface); border: 1px solid var(--border2);
-  cursor: pointer; display: flex; align-items: center; justify-content: center;
-  font-size: 16px; transition: all var(--transition); flex-shrink: 0;
-}
-.icon-btn:hover { background: var(--bg4); transform: scale(1.05); }
-
-/* ── LAYOUT ─────────────────────────────────── */
-.app-layout {
-  display: grid;
-  grid-template-columns: 288px 1fr;
-  min-height: calc(100vh - 58px);
-}
-@media (max-width: 800px) {
-  .app-layout { grid-template-columns: 1fr; }
-}
-
-/* ── SIDEBAR ─────────────────────────────────── */
-.sidebar {
-  background: var(--bg2);
-  border-right: 1px solid var(--border);
-  padding: 20px 16px 32px;
-  display: flex; flex-direction: column; gap: 20px;
-  position: sticky; top: 58px;
-  height: calc(100vh - 58px);
-  overflow-y: auto;
-}
-.sidebar::-webkit-scrollbar { width: 3px; }
-.sidebar::-webkit-scrollbar-track { background: transparent; }
-.sidebar::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
-
-@media (max-width: 800px) {
-  .sidebar {
-    position: fixed; left: -308px; top: 58px; z-index: 90;
-    width: 288px; height: calc(100vh - 58px);
-    transition: left 0.3s cubic-bezier(0.4,0,0.2,1);
-    box-shadow: 6px 0 32px rgba(0,0,0,0.5);
-  }
-  .sidebar.open { left: 0; }
-}
-
-.filter-section { display: flex; flex-direction: column; gap: 10px; }
-.filter-label {
-  font-size: 10.5px; font-weight: 600; letter-spacing: 0.09em;
-  text-transform: uppercase; color: var(--text3);
-  display: flex; align-items: center; gap: 6px;
-}
-.filter-label .icon { font-size: 13px; }
-
-/* ── TOGGLE PILLS ─────────────────────────────── */
-.pill-group { display: flex; gap: 6px; flex-wrap: wrap; }
-.pill {
-  padding: 6px 14px; border-radius: 100px;
-  font-size: 12.5px; font-weight: 500; cursor: pointer;
-  border: 1px solid var(--border2);
-  background: var(--surface); color: var(--text2);
-  transition: all var(--transition); white-space: nowrap;
-  user-select: none;
-}
-.pill:hover { border-color: var(--accent); color: var(--accent2); }
-.pill.active { background: var(--accent-glow); border-color: var(--accent); color: var(--accent2); }
-.pill.veg { border-color: rgba(74,222,128,0.3); }
-.pill.nonveg { border-color: rgba(249,115,22,0.3); }
-.pill.veg.active { background: var(--green-bg); border-color: var(--green); color: var(--green); }
-.pill.nonveg.active { background: var(--orange-bg); border-color: var(--orange); color: var(--orange); }
-
-/* ── CHECKBOXES ─────────────────────────────── */
-.check-group { display: flex; flex-direction: column; gap: 7px; }
-.check-item {
-  display: flex; align-items: center; gap: 10px;
-  padding: 9px 12px; border-radius: var(--radius-sm);
-  cursor: pointer; border: 1px solid var(--border);
-  background: var(--surface); transition: all var(--transition);
-  user-select: none;
-}
-.check-item:hover { border-color: var(--border2); background: var(--surface2); }
-.check-item.active { border-color: var(--accent); background: var(--accent-glow); }
-.check-box {
-  width: 18px; height: 18px; border-radius: 5px;
-  border: 1.5px solid var(--border2); background: var(--bg3);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 11px; transition: all var(--transition); flex-shrink: 0;
-}
-.check-item.active .check-box { background: var(--accent); border-color: var(--accent); color: #fff; }
-.check-text { font-size: 13px; font-weight: 500; flex: 1; }
-.check-sub { font-size: 11px; color: var(--text3); margin-top: 1px; }
-
-/* ── EFFORT SLIDER ─────────────────────────── */
-.slider-wrap { display: flex; flex-direction: column; gap: 8px; }
-.slider-row { display: flex; justify-content: space-between; align-items: center; }
-.slider-hint { font-size: 12px; color: var(--text3); }
-.slider-val {
-  font-size: 12px; font-weight: 600; color: var(--accent2);
-  background: var(--accent-glow); padding: 2px 10px; border-radius: 100px;
-}
-input[type="range"] {
-  -webkit-appearance: none; width: 100%; height: 4px;
-  border-radius: 2px; background: var(--bg4); outline: none; cursor: pointer;
-}
-input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%;
-  background: var(--accent); cursor: pointer; transition: transform 0.15s;
-  box-shadow: 0 0 0 3px var(--accent-glow);
-}
-input[type="range"]:hover::-webkit-slider-thumb { transform: scale(1.2); }
-.effort-labels { display: flex; justify-content: space-between; }
-.effort-labels span { font-size: 10px; color: var(--text3); }
-
-/* ── HUNGER SELECTOR ─────────────────────────── */
-.hunger-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-.hunger-card {
-  padding: 10px 8px; border-radius: var(--radius-sm);
-  border: 1px solid var(--border); background: var(--surface);
-  cursor: pointer; transition: all var(--transition);
-  text-align: center; user-select: none;
-}
-.hunger-card:hover { border-color: var(--border2); background: var(--surface2); }
-.hunger-card.active { border-color: var(--accent); background: var(--accent-glow); }
-.hc-emoji { font-size: 20px; display: block; margin-bottom: 3px; }
-.hc-label { font-size: 11px; font-weight: 600; color: var(--text3); }
-.hunger-card.active .hc-label { color: var(--accent2); }
-
-/* ── DECIDE BUTTON ─────────────────────────── */
-.decide-btn {
-  width: 100%; padding: 13px;
-  border-radius: var(--radius);
-  background: linear-gradient(135deg, var(--accent), #a78bfa);
-  border: none; color: #fff;
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 14px; font-weight: 700;
-  cursor: pointer; letter-spacing: 0.04em;
-  position: relative; overflow: hidden;
-  transition: all var(--transition);
-}
-.decide-btn::before {
-  content: ''; position: absolute; inset: 0;
-  background: linear-gradient(135deg, #a78bfa, var(--accent));
-  opacity: 0; transition: opacity var(--transition);
-}
-.decide-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(124,106,247,0.45); }
-.decide-btn:hover::before { opacity: 1; }
-.decide-btn:active { transform: translateY(0); }
-.decide-btn span { position: relative; z-index: 1; }
-
-.reset-btn {
-  width: 100%; padding: 9px;
-  border-radius: var(--radius-sm);
-  background: transparent; border: 1px solid var(--border);
-  color: var(--text3); font-size: 12px; font-weight: 500;
-  cursor: pointer; transition: all var(--transition);
-}
-.reset-btn:hover { border-color: var(--border2); color: var(--text2); background: var(--surface); }
-
-/* ── MAIN CONTENT ─────────────────────────── */
-.main {
-  background: var(--bg);
-  padding: 20px 24px;
-  display: flex; flex-direction: column; gap: 16px;
-}
-@media (max-width: 800px) { .main { padding: 14px 16px; } }
-
-/* ── TOOLBAR ─────────────────────────────── */
-.toolbar {
-  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
-}
-.search-wrap { flex: 1; min-width: 180px; position: relative; }
-.search-wrap input {
-  width: 100%; padding: 9px 16px 9px 38px;
-  border-radius: var(--radius);
-  background: var(--surface); border: 1px solid var(--border);
-  color: var(--text); font-size: 13.5px; outline: none;
-  transition: all var(--transition);
-  font-family: 'Inter', sans-serif;
-}
-.search-wrap input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
-.search-wrap input::placeholder { color: var(--text3); }
-.search-icon {
-  position: absolute; left: 13px; top: 50%; transform: translateY(-50%);
-  color: var(--text3); font-size: 15px; pointer-events: none;
-}
-.count-badge {
-  padding: 7px 14px; border-radius: 100px;
-  background: var(--surface); border: 1px solid var(--border);
-  font-size: 12.5px; color: var(--text2); white-space: nowrap;
-}
-.count-badge strong { color: var(--accent2); font-weight: 700; }
-.sort-select {
-  padding: 8px 12px; border-radius: var(--radius-sm);
-  background: var(--surface); border: 1px solid var(--border);
-  color: var(--text); font-size: 13px; outline: none; cursor: pointer;
-  font-family: 'Inter', sans-serif;
-}
-.sort-select:focus { border-color: var(--accent); }
-.mobile-filter-btn {
-  display: none; padding: 9px 14px;
-  border-radius: var(--radius);
-  background: var(--surface); border: 1px solid var(--border2);
-  color: var(--text2); font-size: 13.5px; cursor: pointer;
-  align-items: center; gap: 6px; white-space: nowrap;
-  transition: all var(--transition);
-}
-@media (max-width: 800px) { .mobile-filter-btn { display: flex; } }
-
-/* ── ACTIVE FILTER PILLS ─────────────────── */
-.active-filters {
-  display: flex; gap: 6px; flex-wrap: wrap; align-items: center;
-  min-height: 0;
-}
-.filter-pill {
-  padding: 4px 10px; border-radius: 100px;
-  font-size: 11.5px; font-weight: 500;
-  background: var(--accent-glow); border: 1px solid var(--accent);
-  color: var(--accent2); cursor: pointer;
-  transition: all var(--transition); display: flex; align-items: center; gap: 4px;
-}
-.filter-pill:hover { background: rgba(248,113,113,0.1); border-color: var(--red); color: var(--red); }
-
-/* ── TAG BAR ─────────────────────────────── */
-.tag-bar-wrap { display: flex; align-items: flex-start; gap: 10px; flex-wrap: wrap; }
-.tag-bar-label { font-size: 11px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text3); padding-top: 6px; white-space: nowrap; }
-.tag-bar { display: flex; gap: 6px; flex-wrap: wrap; flex: 1; }
-.tag-chip {
-  padding: 4px 11px; border-radius: 100px;
-  font-size: 11.5px; font-weight: 500; cursor: pointer;
-  border: 1px solid var(--border); background: var(--surface);
-  color: var(--text3); transition: all var(--transition); user-select: none;
-}
-.tag-chip:hover { border-color: var(--accent); color: var(--accent2); }
-.tag-chip.active { background: var(--accent-glow); border-color: var(--accent); color: var(--accent2); }
-
-/* ── CARDS GRID ─────────────────────────── */
-.cards-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 14px;
-}
-@media (max-width: 520px) {
-  .cards-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
-}
-@media (max-width: 340px) {
-  .cards-grid { grid-template-columns: 1fr; }
-}
-
-/* ── SKELETON ─────────────────────────────── */
-@keyframes shimmer {
-  0% { background-position: -600px 0; }
-  100% { background-position: 600px 0; }
-}
-.skeleton-card {
-  border-radius: var(--radius-lg);
-  background: linear-gradient(90deg, var(--surface) 25%, var(--surface2) 50%, var(--surface) 75%);
-  background-size: 1200px 100%;
-  height: 200px;
-  animation: shimmer 1.4s infinite linear;
-}
-
-/* ── MEAL CARD ─────────────────────────────── */
-@keyframes cardIn {
-  from { opacity: 0; transform: translateY(10px) scale(0.97); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
-}
-.meal-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 15px;
-  cursor: pointer;
-  transition: border-color var(--transition), background var(--transition),
-              transform var(--transition), box-shadow var(--transition);
-  position: relative; overflow: hidden;
-  display: flex; flex-direction: column; gap: 10px;
-}
-.meal-card:hover {
-  border-color: var(--border2);
-  background: var(--surface2);
-  transform: translateY(-3px);
-  box-shadow: 0 10px 36px rgba(0,0,0,0.25);
-}
-.meal-card.winner {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 1px var(--accent-glow), 0 8px 32px rgba(124,106,247,0.2);
-  animation: winnerPulse 2.5s ease-in-out infinite;
-}
-@keyframes winnerPulse {
-  0%, 100% { box-shadow: 0 0 0 1px var(--accent-glow), 0 8px 32px rgba(124,106,247,0.18); }
-  50%       { box-shadow: 0 0 0 3px var(--accent-glow), 0 8px 40px rgba(124,106,247,0.32); }
-}
-.winner-badge {
-  position: absolute; top: 10px; right: 10px;
-  background: linear-gradient(135deg, var(--accent), var(--pink));
-  color: #fff; font-size: 10px; font-weight: 700;
-  padding: 3px 8px; border-radius: 100px; letter-spacing: 0.04em;
-}
-.card-top { display: flex; align-items: flex-start; gap: 10px; }
-.card-emoji {
-  font-size: 28px; line-height: 1;
-  background: var(--bg3); border-radius: var(--radius-sm);
-  padding: 8px; flex-shrink: 0; width: 48px; height: 48px;
-  display: flex; align-items: center; justify-content: center;
-}
-.card-info { flex: 1; min-width: 0; }
-.card-name {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 14.5px; font-weight: 600;
-  color: var(--text);
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-}
-.card-desc { font-size: 11.5px; color: var(--text3); line-height: 1.45; margin-top: 2px; }
-
-.veg-dot {
-  width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; margin-top: 5px;
-}
-.veg-dot.veg { background: var(--green); box-shadow: 0 0 5px rgba(74,222,128,0.5); }
-.veg-dot.nonveg { background: var(--orange); box-shadow: 0 0 5px rgba(249,115,22,0.5); }
-
-.card-meta { display: flex; gap: 5px; flex-wrap: wrap; }
-.meta-chip {
-  padding: 3px 8px; border-radius: 100px;
-  font-size: 10.5px; font-weight: 600;
-  display: inline-flex; align-items: center; gap: 3px; white-space: nowrap;
-}
-.meta-chip.effort   { background: var(--blue-bg);   color: var(--blue); }
-.meta-chip.time     { background: var(--yellow-bg);  color: var(--yellow); }
-.meta-chip.cost     { background: var(--teal-bg);    color: var(--teal); }
-.meta-chip.who-me       { background: var(--pink-bg);   color: var(--pink); }
-.meta-chip.who-roommate { background: var(--orange-bg); color: var(--orange); }
-.meta-chip.who-both     { background: var(--accent-glow); color: var(--accent2); }
-
-.card-tags { display: flex; gap: 4px; flex-wrap: wrap; }
-.tag {
-  padding: 2px 7px; border-radius: 100px;
-  font-size: 10px; font-weight: 500;
-  background: var(--bg4); color: var(--text3);
-  border: 1px solid var(--border);
-}
-
-/* Score bar */
-.score-bar-wrap { display: flex; align-items: center; gap: 8px; }
-.score-bar-bg { flex: 1; height: 3px; border-radius: 2px; background: var(--bg4); overflow: hidden; }
-.score-bar-fill {
-  height: 100%; border-radius: 2px;
-  background: linear-gradient(90deg, var(--accent), var(--pink));
-  transition: width 0.7s cubic-bezier(0.4,0,0.2,1);
-}
-.score-num { font-size: 11px; font-weight: 700; color: var(--accent2); min-width: 28px; text-align: right; }
-
-/* ── EMPTY STATE ─────────────────────────── */
-.empty {
-  grid-column: 1 / -1; text-align: center;
-  padding: 64px 20px;
-  display: flex; flex-direction: column; align-items: center; gap: 10px;
-}
-.empty-emoji { font-size: 44px; }
-.empty-title { font-size: 17px; font-weight: 600; color: var(--text2); }
-.empty-sub { font-size: 13px; color: var(--text3); max-width: 260px; line-height: 1.65; }
-
-/* ── MODAL ─────────────────────────────────── */
-.modal-overlay {
-  position: fixed; inset: 0; z-index: 200;
-  background: rgba(0,0,0,0.55);
-  backdrop-filter: blur(10px);
-  display: flex; align-items: flex-end;
-  opacity: 0; pointer-events: none;
-  transition: opacity 0.25s;
-}
-@media (min-width: 600px) {
-  .modal-overlay { align-items: center; justify-content: center; }
-}
-.modal-overlay.open { opacity: 1; pointer-events: all; }
-.modal {
-  background: var(--bg2); border: 1px solid var(--border2);
-  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
-  padding: 24px; max-width: 480px; width: 100%;
-  transform: translateY(24px);
-  transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
-  max-height: 88vh; overflow-y: auto;
-}
-@media (min-width: 600px) {
-  .modal { border-radius: var(--radius-xl); transform: scale(0.94) translateY(12px); }
-}
-.modal-overlay.open .modal { transform: translateY(0) scale(1); }
-.modal-handle {
-  width: 36px; height: 4px; border-radius: 2px;
-  background: var(--border2); margin: 0 auto 18px;
-}
-@media (min-width: 600px) { .modal-handle { display: none; } }
-
-.modal-emoji { font-size: 48px; margin-bottom: 8px; display: block; }
-.modal-name { font-family: 'Space Grotesk', sans-serif; font-size: 24px; font-weight: 700; margin-bottom: 4px; }
-.modal-desc { font-size: 14px; color: var(--text2); margin-bottom: 16px; line-height: 1.65; }
-.modal-section-label {
-  font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
-  color: var(--text3); margin-bottom: 8px;
-}
-.modal-ingredients { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
-.ingredient {
-  padding: 4px 10px; border-radius: 100px;
-  background: var(--bg3); border: 1px solid var(--border);
-  font-size: 12px; color: var(--text2);
-}
-.modal-stats {
-  display: grid; grid-template-columns: 1fr 1fr 1fr;
-  gap: 8px; margin-bottom: 16px;
-}
-.stat-box { background: var(--bg3); border-radius: var(--radius-sm); padding: 10px; text-align: center; }
-.stat-val { font-size: 18px; font-weight: 700; color: var(--text); }
-.stat-lbl { font-size: 11px; color: var(--text3); margin-top: 2px; }
-.modal-tags { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 16px; }
-.modal-close {
-  width: 100%; padding: 12px; border-radius: var(--radius);
-  background: var(--surface); border: 1px solid var(--border2);
-  color: var(--text); font-size: 14px; font-weight: 500;
-  cursor: pointer; transition: all var(--transition);
-  font-family: 'Inter', sans-serif;
-}
-.modal-close:hover { background: var(--surface2); }
-
-/* ── DECIDE MODAL ─────────────────────────── */
-.decide-result { text-align: center; padding: 8px 0 4px; }
-.dice-anim {
-  font-size: 60px; display: block; margin-bottom: 10px;
-  animation: diceSpin 0.5s ease-out;
-}
-@keyframes diceSpin {
-  0%   { transform: rotate(0deg) scale(0.5); opacity: 0; }
-  60%  { transform: rotate(380deg) scale(1.1); }
-  100% { transform: rotate(360deg) scale(1); opacity: 1; }
-}
-.decide-title {
-  font-size: 11px; color: var(--text3);
-  letter-spacing: 0.1em; text-transform: uppercase; font-weight: 700;
-  margin-bottom: 8px;
-}
-.decide-pick {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 28px; font-weight: 700;
-  background: linear-gradient(135deg, var(--accent2), var(--pink));
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  background-clip: text; margin-bottom: 6px;
-}
-.decide-score { font-size: 13px; color: var(--text2); margin-bottom: 16px; line-height: 1.5; }
-#decideCardWrap .meal-card { cursor: default; animation: none; }
-#decideCardWrap .meal-card:hover { transform: none; box-shadow: none; }
-
-/* ── SIDEBAR OVERLAY ─────────────────────── */
-.sidebar-overlay {
-  display: none; position: fixed; inset: 0; z-index: 80;
-  background: rgba(0,0,0,0.5);
-  backdrop-filter: blur(2px);
-}
-@media (max-width: 800px) { .sidebar-overlay.open { display: block; } }
-
-/* ── SCROLLBAR ─────────────────────────── */
-::-webkit-scrollbar { width: 5px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KhanaKya? — Premium Smart Meal Planner</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<header class="header">
-  <div class="logo">KhanaKya? <span>what should we eat</span></div>
-  <div class="header-right">
-    <button class="icon-btn" id="themeBtn" title="Toggle theme" aria-label="Toggle light/dark mode">🌙</button>
-  </div>
-</header>
-
-<div class="sidebar-overlay" id="sidebarOverlay"></div>
-
-<div class="app-layout">
-
-  <!-- ── SIDEBAR ──────────────────────── -->
-  <aside class="sidebar" id="sidebar">
-
-    <!-- VEG / NON-VEG -->
-    <div class="filter-section">
-      <div class="filter-label"><span class="icon">🥗</span> Food Type</div>
-      <div class="pill-group">
-        <div class="pill active" data-filter="type" data-val="all"    onclick="setType(this,'all')">All</div>
-        <div class="pill veg"   data-filter="type" data-val="veg"    onclick="setType(this,'veg')">🟢 Veg</div>
-        <div class="pill nonveg" data-filter="type" data-val="nonveg" onclick="setType(this,'nonveg')">🔴 Non-Veg</div>
-      </div>
+  <header class="header">
+    <div class="logo-group">
+      <h1 class="logo">KhanaKya?</h1>
+      <span>Smart Menu Planner</span>
     </div>
-
-    <!-- WHO CAN EAT -->
-    <div class="filter-section">
-      <div class="filter-label"><span class="icon">👥</span> Who's Eating</div>
-      <div class="check-group">
-        <div class="check-item active" id="check-me" onclick="toggleWho('me')">
-          <div class="check-box">✓</div>
-          <div>
-            <div class="check-text">Me 🙋</div>
-            <div class="check-sub">my dietary preferences</div>
-          </div>
-        </div>
-        <div class="check-item active" id="check-roommate" onclick="toggleWho('roommate')">
-          <div class="check-box">✓</div>
-          <div>
-            <div class="check-text">Roommate 🤝</div>
-            <div class="check-sub">their preferences too</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- MAX EFFORT SLIDER -->
-    <div class="filter-section">
-      <div class="filter-label"><span class="icon">⚡</span> Max Effort</div>
-      <div class="slider-wrap">
-        <div class="slider-row">
-          <span class="slider-hint">How lazy are we?</span>
-          <span class="slider-val" id="effortVal">5 / 5</span>
-        </div>
-        <input type="range" min="1" max="5" value="5" id="effortSlider" oninput="updateEffort(this.value)">
-        <div class="effort-labels">
-          <span>😴 Instant</span>
-          <span>🔥 Full Cook</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- HUNGER LEVEL -->
-    <div class="filter-section">
-      <div class="filter-label"><span class="icon">🍽️</span> Hunger Level</div>
-      <div class="hunger-grid">
-        <div class="hunger-card active" data-hunger="snack"   onclick="setHunger(this,'snack')"><span class="hc-emoji">🍿</span><div class="hc-label">Snack</div></div>
-        <div class="hunger-card active" data-hunger="light"   onclick="setHunger(this,'light')"><span class="hc-emoji">🥗</span><div class="hc-label">Light Meal</div></div>
-        <div class="hunger-card active" data-hunger="meal"    onclick="setHunger(this,'meal')"><span class="hc-emoji">🍛</span><div class="hc-label">Proper Meal</div></div>
-        <div class="hunger-card active" data-hunger="outside" onclick="setHunger(this,'outside')"><span class="hc-emoji">💸</span><div class="hc-label">Go All Out</div></div>
-      </div>
-    </div>
-
-    <!-- DECIDE FOR ME -->
-    <button class="decide-btn" onclick="decideForMe()">
-      <span>🎲 DECIDE FOR ME</span>
-    </button>
-
-    <button class="reset-btn" onclick="resetFilters()">↺ Reset All Filters</button>
-
-  </aside>
-
-  <!-- ── MAIN ────────────────────────── -->
-  <main class="main">
-
-    <!-- Toolbar -->
-    <div class="toolbar">
-      <button class="mobile-filter-btn icon-btn" style="width:auto;border-radius:var(--radius)" onclick="toggleSidebar()">
-        ⚙️ Filters
+    <div class="header-actions">
+      <button id="shareBtn" class="btn btn-secondary btn-sm" title="Copy shareable link to clipboard">
+        <span>🔗 Share Menu</span>
       </button>
-      <div class="search-wrap">
-        <span class="search-icon">🔍</span>
-        <input type="text" id="searchInput" placeholder="Search meals, ingredients…" oninput="applyFilters()">
+      <button id="themeBtn" class="theme-btn" aria-label="Toggle theme">🌙</button>
+    </div>
+  </header>
+
+  <div class="app-container">
+    <aside id="sidebar" class="sidebar">
+      <div class="filter-group">
+        <label class="section-title">Dietary Preference</label>
+        <div class="pill-switch">
+          <button class="diet-pill active" data-type="all">All</button>
+          <button class="diet-pill veg" data-type="veg">🟢 Veg</button>
+          <button class="diet-pill nonveg" data-type="nonveg">🔴 Non-Veg</button>
+        </div>
       </div>
-      <div class="count-badge"><strong id="countNum">0</strong> meals</div>
-      <select class="sort-select" id="sortSelect" onchange="applyFilters()">
-        <option value="score">Best Match</option>
-        <option value="effort">Least Effort</option>
-        <option value="time">Fastest</option>
-        <option value="cost">Cheapest</option>
-        <option value="popularity">Most Popular</option>
-      </select>
-    </div>
 
-    <!-- Active filter pills -->
-    <div class="active-filters" id="activeFilters"></div>
-
-    <!-- Tag filter bar -->
-    <div class="tag-bar-wrap">
-      <span class="tag-bar-label">Tags</span>
-      <div class="tag-bar" id="tagBar"></div>
-    </div>
-
-    <!-- Cards grid -->
-    <div class="cards-grid" id="cardsGrid">
-      <div class="skeleton-card"></div>
-      <div class="skeleton-card"></div>
-      <div class="skeleton-card"></div>
-      <div class="skeleton-card"></div>
-      <div class="skeleton-card"></div>
-      <div class="skeleton-card"></div>
-    </div>
-
-  </main>
-</div>
-
-<!-- ── MEAL DETAIL MODAL ─────────────────── -->
-<div class="modal-overlay" id="mealModal" onclick="closeModal(event)">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <span class="modal-emoji" id="mEmoji"></span>
-    <div class="modal-name" id="mName"></div>
-    <div class="modal-desc" id="mDesc"></div>
-    <div class="modal-section-label">Ingredients</div>
-    <div class="modal-ingredients" id="mIngredients"></div>
-    <div class="modal-stats">
-      <div class="stat-box"><div class="stat-val" id="mTime"></div><div class="stat-lbl">⏱ minutes</div></div>
-      <div class="stat-box"><div class="stat-val" id="mCost"></div><div class="stat-lbl">💰 approx cost</div></div>
-      <div class="stat-box"><div class="stat-val" id="mEffort"></div><div class="stat-lbl">⚡ effort</div></div>
-    </div>
-    <div class="modal-tags" id="mTags"></div>
-    <button class="modal-close" onclick="closeAllModals()">Close</button>
-  </div>
-</div>
-
-<!-- ── DECIDE MODAL ─────────────────────── -->
-<div class="modal-overlay" id="decideModal" onclick="closeModal(event)">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="decide-result">
-      <span class="dice-anim" id="diceEmoji">🎲</span>
-      <div class="decide-title">Tonight's Verdict</div>
-      <div class="decide-pick" id="decidePick">—</div>
-      <div class="decide-score" id="decideScore"></div>
-    </div>
-    <div id="decideCardWrap"></div>
-    <button class="modal-close" onclick="closeAllModals()">Sounds Good!</button>
-  </div>
-</div>
-
-<script>
-// ── DATA ──────────────────────────────────────────────────────────────
-const MEALS = [
-  {"id":1,"name":"Bread Omelette","emoji":"🍳","type":"nonveg","effort":1,"hunger":"snack","who":"both","time":8,"cost":40,"tags":["quick","protein","breakfast","easy"],"ingredients":["eggs","bread","onion","green chilli","butter"],"popularity":9,"description":"Crispy edges, soft inside. Breakfast anytime."},
-  {"id":2,"name":"Bread Jam","emoji":"🍞","type":"veg","effort":1,"hunger":"snack","who":"both","time":3,"cost":15,"tags":["instant","light","breakfast","quick"],"ingredients":["bread","jam","butter"],"popularity":7,"description":"No effort, no mess. The laziest morning fix."},
-  {"id":3,"name":"Aloo Sandwich","emoji":"🥪","type":"veg","effort":1,"hunger":"snack","who":"both","time":10,"cost":30,"tags":["quick","filling","breakfast","indian"],"ingredients":["bread","potato","spices","chutney","butter"],"popularity":7,"description":"Spiced potato stuffed between toasty bread slices."},
-  {"id":4,"name":"Poha","emoji":"🥘","type":"veg","effort":1,"hunger":"snack","who":"both","time":10,"cost":25,"tags":["light","indian","breakfast","quick"],"ingredients":["poha","onion","potato","mustard seeds","curry leaves"],"popularity":8,"description":"Fluffy and tangy. The ideal lazy morning."},
-  {"id":5,"name":"Jau / Seviyan","emoji":"🍶","type":"veg","effort":1,"hunger":"snack","who":"both","time":10,"cost":20,"tags":["light","indian","breakfast","quick"],"ingredients":["seviyan","milk","sugar"],"popularity":6,"description":"Light and warm. Old-school breakfast comfort."},
-  {"id":6,"name":"Halwa","emoji":"🍮","type":"veg","effort":2,"hunger":"snack","who":"both","time":15,"cost":30,"tags":["sweet","indian","comfort","quick"],"ingredients":["suji","ghee","sugar","water","dry fruits"],"popularity":7,"description":"Ghee-roasted suji with a touch of sweetness."},
-  {"id":7,"name":"Boiled Eggs","emoji":"🥚","type":"nonveg","effort":1,"hunger":"snack","who":"both","time":10,"cost":20,"tags":["protein","quick","healthy","breakfast"],"ingredients":["eggs","salt","pepper"],"popularity":8,"description":"Minimal effort, maximum protein. No excuses."},
-  {"id":8,"name":"Egg Bhurji","emoji":"🍳","type":"nonveg","effort":1,"hunger":"snack","who":"both","time":10,"cost":35,"tags":["protein","quick","spicy","breakfast"],"ingredients":["eggs","onion","tomato","green chilli","spices"],"popularity":9,"description":"Spiced scrambled eggs. Street food favourite."},
-  {"id":9,"name":"Paneer Bhurji","emoji":"🧀","type":"veg","effort":2,"hunger":"snack","who":"both","time":15,"cost":80,"tags":["protein","indian","spicy","breakfast"],"ingredients":["paneer","onion","tomato","capsicum","spices"],"popularity":7,"description":"Scrambled paneer with masala. Rich and filling."},
-  {"id":10,"name":"Half Egg Fry","emoji":"🍳","type":"nonveg","effort":1,"hunger":"snack","who":"both","time":5,"cost":15,"tags":["instant","protein","quick","breakfast"],"ingredients":["egg","butter","salt","pepper"],"popularity":8,"description":"Sunny side up. The simplest egg story."},
-  {"id":11,"name":"Paneer Sandwich","emoji":"🥪","type":"veg","effort":1,"hunger":"snack","who":"both","time":10,"cost":70,"tags":["quick","protein","filling","breakfast"],"ingredients":["bread","paneer","veggies","chutney","butter"],"popularity":7,"description":"Grilled paneer packed between toasted bread."},
-  {"id":12,"name":"Veg Sandwich","emoji":"🥪","type":"veg","effort":1,"hunger":"snack","who":"both","time":8,"cost":30,"tags":["quick","light","cold","easy"],"ingredients":["bread","veggies","cheese","mayo","chutney"],"popularity":7,"description":"Stacked with veggies. No fire needed."},
-  {"id":13,"name":"Maggi","emoji":"🍜","type":"veg","effort":1,"hunger":"snack","who":"both","time":5,"cost":30,"tags":["instant","comfort","indian","quick"],"ingredients":["maggi","masala","water","veggies"],"popularity":10,"description":"The classic dorm saviour. Two-minute miracle."},
-  {"id":14,"name":"Chilli Cheese","emoji":"🌶️","type":"veg","effort":1,"hunger":"snack","who":"both","time":8,"cost":50,"tags":["quick","spicy","snack","comfort"],"ingredients":["bread","cheese","green chilli","butter","chilli flakes"],"popularity":8,"description":"Melty cheese with a chilli kick. Instant mood boost."},
-  {"id":15,"name":"Daliya","emoji":"🥣","type":"veg","effort":2,"hunger":"light","who":"both","time":20,"cost":25,"tags":["healthy","light","breakfast","filling"],"ingredients":["daliya","milk","sugar","dry fruits"],"popularity":6,"description":"Wholesome broken wheat. Healthy comfort in a bowl."},
-  {"id":16,"name":"Chura/Poha-Milk","emoji":"🥛","type":"veg","effort":1,"hunger":"snack","who":"both","time":5,"cost":20,"tags":["instant","light","breakfast","quick"],"ingredients":["poha","milk","sugar","banana"],"popularity":6,"description":"Cold poha soaked in milk. The no-cook breakfast."},
-  {"id":17,"name":"Egg Fried Rice","emoji":"🍳","type":"nonveg","effort":2,"hunger":"meal","who":"both","time":25,"cost":60,"tags":["chinese","filling","rice","protein"],"ingredients":["rice","egg","soy sauce","spring onion","veggies","garlic"],"popularity":9,"description":"Wok-tossed rice with egg. Quick and satisfying."},
-  {"id":18,"name":"Dal Chawal","emoji":"🍚","type":"veg","effort":2,"hunger":"meal","who":"both","time":25,"cost":50,"tags":["homely","indian","filling","protein"],"ingredients":["dal","rice","onion","tomato","spices"],"popularity":9,"description":"Desi soul food. Gets you through anything."},
-  {"id":19,"name":"Bhindi Roti","emoji":"🫓","type":"veg","effort":3,"hunger":"meal","who":"both","time":30,"cost":55,"tags":["homely","indian","filling","sabzi"],"ingredients":["bhindi","onion","tomato","roti","spices"],"popularity":7,"description":"Crispy okra with soft rotis. Simple and satisfying."},
-  {"id":20,"name":"Rajma Rice","emoji":"🫘","type":"veg","effort":3,"hunger":"meal","who":"both","time":45,"cost":60,"tags":["punjabi","homely","protein","filling"],"ingredients":["rajma","rice","onion","tomato","spices"],"popularity":9,"description":"The ultimate desi comfort meal. Worth the wait."},
-  {"id":21,"name":"Egg Curry Rice","emoji":"🥚","type":"nonveg","effort":3,"hunger":"meal","who":"both","time":35,"cost":70,"tags":["homely","indian","protein","filling"],"ingredients":["eggs","rice","onion","tomato","spices","coconut milk"],"popularity":8,"description":"Boiled eggs in rich masala curry. Weekend energy."},
-  {"id":22,"name":"Fish Fry","emoji":"🐟","type":"nonveg","effort":3,"hunger":"meal","who":"both","time":30,"cost":150,"tags":["coastal","protein","crispy","special"],"ingredients":["fish","spices","besan","oil","lemon"],"popularity":8,"description":"Crispy fried fish with spiced coating. Treat yourself."},
-  {"id":23,"name":"Omelette Rice","emoji":"🍳","type":"nonveg","effort":2,"hunger":"meal","who":"both","time":20,"cost":50,"tags":["quick","protein","rice","easy"],"ingredients":["eggs","rice","onion","butter","spices"],"popularity":8,"description":"Fluffy omelette over warm rice. Simple wins."},
-  {"id":24,"name":"Soya Bean Rice","emoji":"🌱","type":"veg","effort":2,"hunger":"meal","who":"both","time":25,"cost":45,"tags":["protein","healthy","rice","indian"],"ingredients":["soya chunks","rice","onion","tomato","spices"],"popularity":7,"description":"High-protein soya in spiced rice. Underrated gem."},
-  {"id":25,"name":"Rice Pulao","emoji":"🍚","type":"veg","effort":2,"hunger":"meal","who":"both","time":25,"cost":50,"tags":["homely","indian","rice","light"],"ingredients":["rice","whole spices","onion","veggies","ghee"],"popularity":7,"description":"Fragrant spiced rice. Light yet filling."},
-  {"id":26,"name":"Paneer Rice","emoji":"🧀","type":"veg","effort":2,"hunger":"meal","who":"both","time":25,"cost":90,"tags":["protein","indian","rice","rich"],"ingredients":["paneer","rice","onion","tomato","spices","ghee"],"popularity":8,"description":"Paneer chunks in flavoured rice. Rich and filling."},
-  {"id":27,"name":"Curd Rice","emoji":"🍚","type":"veg","effort":1,"hunger":"light","who":"both","time":10,"cost":30,"tags":["light","south-indian","cooling","quick"],"ingredients":["rice","curd","mustard seeds","curry leaves","salt"],"popularity":7,"description":"Cool and tangy. Summer's best comfort food."},
-  {"id":28,"name":"Dahi Aloo","emoji":"🥔","type":"veg","effort":2,"hunger":"meal","who":"both","time":25,"cost":45,"tags":["homely","indian","filling","tangy"],"ingredients":["potato","curd","mustard seeds","spices","curry leaves"],"popularity":7,"description":"Potatoes in a tangy curd gravy. Simple pleasure."},
-  {"id":29,"name":"Chole Rice","emoji":"🫘","type":"veg","effort":3,"hunger":"meal","who":"both","time":35,"cost":60,"tags":["punjabi","protein","filling","indian"],"ingredients":["chole","rice","onion","tomato","spices"],"popularity":8,"description":"Spiced chickpea curry on steamed rice."},
-  {"id":30,"name":"Chole Chana Rice","emoji":"🫘","type":"veg","effort":3,"hunger":"meal","who":"both","time":40,"cost":65,"tags":["punjabi","protein","filling","indian"],"ingredients":["chole","kala chana","rice","onion","tomato","spices"],"popularity":8,"description":"Double legume power. Protein-packed desi bowl."},
-  {"id":31,"name":"Aloo Rice","emoji":"🥔","type":"veg","effort":2,"hunger":"meal","who":"both","time":20,"cost":35,"tags":["homely","quick","rice","filling"],"ingredients":["potato","rice","cumin","onion","spices"],"popularity":7,"description":"Spiced potato rice. The simplest satisfying meal."},
-  {"id":32,"name":"Chicken Rice","emoji":"🍗","type":"nonveg","effort":3,"hunger":"meal","who":"both","time":40,"cost":130,"tags":["protein","filling","rice","chicken"],"ingredients":["chicken","rice","onion","tomato","spices","curd"],"popularity":9,"description":"Tender chicken pieces on flavoured rice."},
-  {"id":33,"name":"Kadi Rice","emoji":"🍲","type":"veg","effort":3,"hunger":"meal","who":"both","time":35,"cost":45,"tags":["rajasthani","homely","tangy","filling"],"ingredients":["curd","besan","rice","pakoda","spices","mustard seeds"],"popularity":8,"description":"Tangy curd gravy with pakodas over rice. Homely gold."}
-];
-
-// ── STATE ─────────────────────────────────────────────────────────────
-let state = {
-  type: 'all',
-  who: ['me', 'roommate'],
-  effort: 5,
-  hunger: ['snack', 'light', 'meal', 'outside'],
-  tags: [],
-  search: '',
-  sort: 'score'
-};
-
-// ── SCORE FORMULA ─────────────────────────────────────────────────────
-// effortMatch * 50 + hungerMatch * 20 + whoMatch * 20 + popularity * 10
-function score(m) {
-  const effortScore  = (m.effort <= state.effort) ? 50 : Math.max(0, 50 - (m.effort - state.effort) * 20);
-  const hungerScore  = state.hunger.includes(m.hunger) ? 20 : 0;
-  const whoScore     = (m.who === 'both' || state.who.includes(m.who)) ? 20 : 0;
-  const popularity   = (m.popularity / 10) * 10;
-  return Math.round(effortScore + hungerScore + whoScore + popularity);
-}
-
-// ── VISIBILITY CHECK ──────────────────────────────────────────────────
-function isVisible(m) {
-  if (state.type !== 'all' && m.type !== state.type) return false;
-  if (state.who.length === 0) return false;
-  if (m.who !== 'both' && !state.who.includes(m.who)) return false;
-  if (m.effort > state.effort) return false;
-  if (!state.hunger.includes(m.hunger)) return false;
-  if (state.tags.length > 0 && !state.tags.some(t => m.tags.includes(t))) return false;
-  if (state.search) {
-    const q = state.search.toLowerCase();
-    if (!m.name.toLowerCase().includes(q) &&
-        !m.description.toLowerCase().includes(q) &&
-        !m.ingredients.some(i => i.toLowerCase().includes(q)) &&
-        !m.tags.some(t => t.toLowerCase().includes(q))) return false;
-  }
-  return true;
-}
-
-// ── SORT ──────────────────────────────────────────────────────────────
-function sortMeals(list) {
-  const s = state.sort;
-  return [...list].sort((a, b) => {
-    if (s === 'score')      return score(b) - score(a);
-    if (s === 'effort')     return a.effort - b.effort;
-    if (s === 'time')       return a.time - b.time;
-    if (s === 'cost')       return a.cost - b.cost;
-    if (s === 'popularity') return b.popularity - a.popularity;
-    return 0;
-  });
-}
-
-// ── LABELS ────────────────────────────────────────────────────────────
-function effortLabel(n) {
-  return ['', '😴 Instant', '🚶 Easy', '🧑‍🍳 Medium', '💪 Effort', '🔥 Full Cook'][n];
-}
-function whoLabel(w) {
-  return w === 'both' ? '👫 Both' : w === 'me' ? '🙋 Me' : '🤝 Roommate';
-}
-function whoClass(w) {
-  return w === 'both' ? 'who-both' : w === 'me' ? 'who-me' : 'who-roommate';
-}
-
-// ── RENDER CARD ───────────────────────────────────────────────────────
-function renderCard(m, rank, delay = 0) {
-  const sc = score(m);
-  const animDelay = delay > 0 ? `style="animation-delay:${delay}ms"` : '';
-  return `
-  <div class="meal-card ${rank === 0 ? 'winner' : ''}" onclick="openMeal(${m.id})" ${animDelay}
-       style="${animDelay ? `animation-delay:${delay}ms;` : ''}animation:cardIn 0.32s cubic-bezier(0.4,0,0.2,1) ${delay}ms both">
-    ${rank === 0 ? '<div class="winner-badge">⭐ Best Pick</div>' : ''}
-    <div class="card-top">
-      <div class="card-emoji">${m.emoji}</div>
-      <div class="card-info">
-        <div class="card-name">${m.name}</div>
-        <div class="card-desc">${m.description}</div>
+      <div class="filter-group">
+        <label class="section-title">Who is Eating?</label>
+        <div class="checkbox-stack">
+          <label class="check-container">
+            <input type="checkbox" id="chk-me" value="me" checked>
+            <span class="custom-check"></span>
+            <div class="check-label-text">
+              <span class="title">🙋 Me Only</span>
+            </div>
+          </label>
+          <label class="check-container">
+            <input type="checkbox" id="chk-roommate" value="roommate" checked>
+            <span class="custom-check"></span>
+            <div class="check-label-text">
+              <span class="title">🤝 Roommate Only</span>
+            </div>
+          </label>
+        </div>
       </div>
-      <div class="veg-dot ${m.type}"></div>
+
+      <div class="filter-group">
+        <div class="slider-header">
+          <label class="section-title">Max Cooking Effort</label>
+          <span id="effortValue" class="badge">Medium (3/5)</span>
+        </div>
+        <input type="range" id="effortSlider" min="1" max="5" value="3" step="1">
+        <div class="slider-labels">
+          <span>Lazy</span>
+          <span>Chef Mood</span>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <label class="section-title">Hunger & Meal Type</label>
+        <div class="hunger-grid">
+          <button class="hunger-btn active" data-hunger="snack">
+            <span class="emoji">🍿</span>
+            <span class="label">Snack</span>
+          </button>
+          <button class="hunger-btn active" data-hunger="light">
+            <span class="emoji">🥣</span>
+            <span class="label">Light Meal</span>
+          </button>
+          <button class="hunger-btn active" data-hunger="meal">
+            <span class="emoji">🍱</span>
+            <span class="label">Proper Meal</span>
+          </button>
+          <button class="hunger-btn active" data-hunger="outside">
+            <span class="emoji">💸</span>
+            <span class="label">Outside Order</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <label class="section-title">Filter by Tag Categories</label>
+        <div id="dynamicTags" class="tags-cloud"></div>
+      </div>
+
+      <div class="sidebar-actions">
+        <button id="decideBtn" class="btn btn-primary pulse">
+          <span>🎲 DECIDE FOR ME</span>
+        </button>
+        <button id="resetFilters" class="btn btn-secondary text-sm">Reset Selections</button>
+      </div>
+    </aside>
+
+    <div id="sidebarOverlay" class="sidebar-overlay"></div>
+
+    <main class="main-content">
+      <div class="toolbar">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="searchInput" placeholder="Search dishes, ingredients, or cuisines...">
+        </div>
+        <div class="sorting-controls">
+          <select id="sortSelect" class="form-select">
+            <option value="score">🎯 Sort by Recommendation Score</option>
+            <option value="effort">⚡ Lowest Effort First</option>
+            <option value="time">⏱ Quickest Cook Time</option>
+            <option value="cost">💰 Cheapest Cost</option>
+            <option value="popularity">🔥 Peak Popularity</option>
+          </select>
+          <div id="resultsCount" class="results-count">Loading menu...</div>
+          <button id="mobileFilterToggle" class="btn btn-secondary mobile-only">🎛 Filters</button>
+        </div>
+      </div>
+
+      <div id="mealsGrid" class="meals-grid skeleton-loading">
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+      </div>
+    </main>
+  </div>
+
+  <div id="mealModal" class="modal-overlay">
+    <div class="modal-card">
+      <button class="modal-close" onclick="closeAllModals()">&times;</button>
+      <div class="modal-hero">
+        <span id="mEmoji" class="modal-emoji">🍲</span>
+        <h2 id="mName" class="modal-title">Dish Name</h2>
+        <div id="mTypeBadge" class="veg-dot"></div>
+      </div>
+      <div class="modal-body">
+        <p id="mDescription" class="modal-desc">Description text goes here.</p>
+        
+        <div class="modal-metrics-grid">
+          <div class="metric-item"><small>Effort</small><strong id="mEffort">3/5</strong></div>
+          <div class="metric-item"><small>Prep Time</small><strong id="mTime">20m</strong></div>
+          <div class="metric-item"><small>Est. Cost</small><strong id="mCost">₹50</strong></div>
+          <div class="metric-item"><small>Audience</small><strong id="mWho">Both</strong></div>
+        </div>
+
+        <div class="ingredients-section">
+          <h3>🛒 Ingredients Needed</h3>
+          <div id="mIngredients" class="ingredients-list"></div>
+        </div>
+
+        <div class="tags-section">
+          <h3>🏷 Categories</h3>
+          <div id="mTags" class="tags-cloud"></div>
+        </div>
+      </div>
     </div>
-    <div class="card-meta">
-      <span class="meta-chip effort">⚡ ${effortLabel(m.effort)}</span>
-      <span class="meta-chip time">⏱ ${m.time}m</span>
-      <span class="meta-chip cost">₹${m.cost}</span>
-      <span class="meta-chip ${whoClass(m.who)}">${whoLabel(m.who)}</span>
+  </div>
+
+  <div id="rouletteModal" class="modal-overlay roulette-overlay">
+    <div class="roulette-box">
+      <h2>Picking the Perfect Choice...</h2>
+      <div class="spinner-container">
+        <div id="rouletteStrip" class="roulette-strip">
+          </div>
+        <div class="pointer-line"></div>
+      </div>
     </div>
-    <div class="card-tags">
-      ${m.tags.slice(0, 3).map(t => `<span class="tag">#${t}</span>`).join('')}
-    </div>
-    <div class="score-bar-wrap">
-      <div class="score-bar-bg"><div class="score-bar-fill" style="width:${sc}%"></div></div>
-      <span class="score-num">${sc}</span>
-    </div>
-  </div>`;
-}
+  </div>
 
-// ── APPLY FILTERS ─────────────────────────────────────────────────────
-function applyFilters() {
-  state.search = document.getElementById('searchInput').value;
-  state.sort   = document.getElementById('sortSelect').value;
-  const grid   = document.getElementById('cardsGrid');
-  const visible = sortMeals(MEALS.filter(isVisible));
-  document.getElementById('countNum').textContent = visible.length;
+  <div id="toast" class="toast">Link copied to clipboard!</div>
 
-  if (visible.length === 0) {
-    grid.innerHTML = `
-      <div class="empty">
-        <div class="empty-emoji">🤷</div>
-        <div class="empty-title">No meals match</div>
-        <div class="empty-sub">Try relaxing your filters — maybe increase effort level or hunger range.</div>
-      </div>`;
-    updateActiveFilters();
-    return;
-  }
-  // Staggered card animation (cap at 150ms so it doesn't feel sluggish)
-  grid.innerHTML = visible.map((m, i) => renderCard(m, i, Math.min(i * 30, 150))).join('');
-  updateActiveFilters();
-}
-
-// ── TAG BAR ───────────────────────────────────────────────────────────
-function buildTagBar() {
-  const allTags = [...new Set(MEALS.flatMap(m => m.tags))].sort();
-  document.getElementById('tagBar').innerHTML = allTags.map(t =>
-    `<span class="tag-chip ${state.tags.includes(t) ? 'active' : ''}" onclick="toggleTag('${t}')">#${t}</span>`
-  ).join('');
-}
-
-function toggleTag(tag) {
-  state.tags = state.tags.includes(tag) ? state.tags.filter(t => t !== tag) : [...state.tags, tag];
-  buildTagBar();
-  applyFilters();
-}
-
-// ── FILTER ACTIONS ────────────────────────────────────────────────────
-function setType(el, val) {
-  state.type = val;
-  document.querySelectorAll('[data-filter="type"]').forEach(p => {
-    p.classList.remove('active', 'veg', 'nonveg');
-    if (p.dataset.val === 'veg')    p.classList.add('veg');
-    if (p.dataset.val === 'nonveg') p.classList.add('nonveg');
-    if (p === el)                   p.classList.add('active');
-  });
-  applyFilters();
-}
-
-function toggleWho(who) {
-  const el = document.getElementById('check-' + who);
-  if (state.who.includes(who)) {
-    if (state.who.length < 2) return; // at least one must remain
-    state.who = state.who.filter(w => w !== who);
-    el.classList.remove('active');
-    el.querySelector('.check-box').textContent = '';
-  } else {
-    state.who.push(who);
-    el.classList.add('active');
-    el.querySelector('.check-box').textContent = '✓';
-  }
-  applyFilters();
-}
-
-function updateEffort(val) {
-  state.effort = parseInt(val);
-  document.getElementById('effortVal').textContent = `${val} / 5`;
-  applyFilters();
-}
-
-function setHunger(el, val) {
-  if (state.hunger.includes(val)) {
-    if (state.hunger.length < 2) return; // at least one must remain
-    state.hunger = state.hunger.filter(h => h !== val);
-    el.classList.remove('active');
-  } else {
-    state.hunger.push(val);
-    el.classList.add('active');
-  }
-  applyFilters();
-}
-
-// ── ACTIVE FILTER CHIPS ───────────────────────────────────────────────
-function updateActiveFilters() {
-  const wrap = document.getElementById('activeFilters');
-  const chips = [];
-  if (state.type !== 'all') chips.push({
-    label: state.type === 'veg' ? '🟢 Veg Only' : '🔴 Non-Veg Only',
-    clear: () => document.querySelector('[data-val="all"]').click()
-  });
-  if (state.effort < 5) chips.push({
-    label: `⚡ Effort ≤ ${state.effort}`,
-    clear: () => { document.getElementById('effortSlider').value = 5; updateEffort(5); }
-  });
-  state.tags.forEach(t => chips.push({ label: `#${t}`, clear: () => toggleTag(t) }));
-  if (state.search) chips.push({
-    label: `"${state.search}"`,
-    clear: () => { document.getElementById('searchInput').value = ''; applyFilters(); }
-  });
-
-  wrap.innerHTML = chips.map((_, i) => `<div class="filter-pill" onclick="clearFilter(${i})">✕ ${chips[i].label}</div>`).join('');
-  wrap._clearFns = chips.map(c => c.clear);
-}
-
-function clearFilter(i) {
-  const fns = document.getElementById('activeFilters')._clearFns;
-  if (fns && fns[i]) fns[i]();
-}
-
-// ── RESET ─────────────────────────────────────────────────────────────
-function resetFilters() {
-  state = { type:'all', who:['me','roommate'], effort:5, hunger:['snack','light','meal','outside'], tags:[], search:'', sort:'score' };
-  document.getElementById('effortSlider').value = 5;
-  document.getElementById('effortVal').textContent = '5 / 5';
-  document.getElementById('searchInput').value = '';
-  document.getElementById('sortSelect').value = 'score';
-  document.querySelector('[data-val="all"]').classList.add('active');
-  document.querySelector('[data-val="veg"]').classList.remove('active');
-  document.querySelector('[data-val="nonveg"]').classList.remove('active');
-  ['me', 'roommate'].forEach(w => {
-    const el = document.getElementById('check-' + w);
-    el.classList.add('active');
-    el.querySelector('.check-box').textContent = '✓';
-  });
-  document.querySelectorAll('.hunger-card').forEach(c => c.classList.add('active'));
-  buildTagBar();
-  applyFilters();
-}
-
-// ── DECIDE FOR ME ─────────────────────────────────────────────────────
-function decideForMe() {
-  const visible = sortMeals(MEALS.filter(isVisible));
-  if (visible.length === 0) {
-    alert('No meals match your current filters! Try relaxing them first.');
-    return;
-  }
-  // Pick randomly from top 5 scoring meals
-  const pool = visible.slice(0, Math.min(5, visible.length));
-  const pick = pool[Math.floor(Math.random() * pool.length)];
-  const sc   = score(pick);
-
-  // Re-trigger spin animation by replacing element
-  const diceEl = document.getElementById('diceEmoji');
-  diceEl.style.animation = 'none';
-  diceEl.textContent = pick.emoji;
-  void diceEl.offsetWidth; // reflow
-  diceEl.style.animation = '';
-
-  document.getElementById('decidePick').textContent  = pick.name;
-  document.getElementById('decideScore').textContent = `Match score: ${sc}/100 — ${pick.description}`;
-  document.getElementById('decideCardWrap').innerHTML = renderCard(pick, -1, 0);
-  document.getElementById('decideModal').classList.add('open');
-}
-
-// ── MEAL DETAIL ───────────────────────────────────────────────────────
-function openMeal(id) {
-  const m = MEALS.find(x => x.id === id);
-  if (!m) return;
-  document.getElementById('mEmoji').textContent     = m.emoji;
-  document.getElementById('mName').textContent      = m.name;
-  document.getElementById('mDesc').textContent      = m.description;
-  document.getElementById('mTime').textContent      = m.time;
-  document.getElementById('mCost').textContent      = '₹' + m.cost;
-  document.getElementById('mEffort').textContent    = m.effort + '/5';
-  document.getElementById('mIngredients').innerHTML = m.ingredients.map(i => `<span class="ingredient">${i}</span>`).join('');
-  document.getElementById('mTags').innerHTML        = m.tags.map(t => `<span class="tag">#${t}</span>`).join('');
-  document.getElementById('mealModal').classList.add('open');
-}
-
-// ── MODALS ────────────────────────────────────────────────────────────
-function closeModal(e) {
-  if (e.target.classList.contains('modal-overlay')) closeAllModals();
-}
-function closeAllModals() {
-  document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('open'));
-}
-
-// ── SIDEBAR TOGGLE ────────────────────────────────────────────────────
-function toggleSidebar() {
-  document.getElementById('sidebar').classList.toggle('open');
-  document.getElementById('sidebarOverlay').classList.toggle('open');
-}
-document.getElementById('sidebarOverlay').addEventListener('click', () => {
-  document.getElementById('sidebar').classList.remove('open');
-  document.getElementById('sidebarOverlay').classList.remove('open');
-});
-
-// ── THEME TOGGLE ──────────────────────────────────────────────────────
-let dark = true;
-document.getElementById('themeBtn').addEventListener('click', () => {
-  dark = !dark;
-  document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
-  document.getElementById('themeBtn').textContent = dark ? '🌙' : '☀️';
-});
-
-// ── KEYBOARD SHORTCUTS ────────────────────────────────────────────────
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') closeAllModals();
-  if ((e.key === '/' || e.key === 'k') && !e.target.matches('input')) {
-    e.preventDefault();
-    document.getElementById('searchInput').focus();
-  }
-});
-
-// ── INIT ──────────────────────────────────────────────────────────────
-buildTagBar();
-applyFilters();
-</script>
+  <script src="script.js" defer></script>
 </body>
 </html>
