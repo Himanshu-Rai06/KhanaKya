@@ -1,280 +1,454 @@
-let meals = [];
-let state = {
-  type: 'all',
+/**
+ * KhanaKya? - Advanced Architecture Script File
+ * Core Features: Real-time State Parsing, Dynamic Category Aggregation, Roulette Engine
+ */
+
+let mealsData = [];
+let appState = {
+  type: 'all',          // veg, nonveg, all
   who: ['me', 'roommate'],
-  effort: 5,
+  maxEffort: 3,
   hunger: ['snack', 'light', 'meal', 'outside'],
-  tags: [],
-  search: '',
-  sort: 'score'
+  selectedTags: [],
+  searchQuery: '',
+  sortCriteria: 'score'
 };
 
-// Score formula
-function score(m) {
-  const effortScore = (m.effort <= state.effort) ? 50 : Math.max(0, 50 - (m.effort - state.effort) * 20);
-  const hungerScore = state.hunger.includes(m.hunger) ? 20 : 0;
-  const whoScore = (m.who === 'both' || state.who.includes(m.who)) ? 20 : 0;
-  const popularity = (m.popularity / 10) * 10;
-  return Math.round(effortScore + hungerScore + whoScore + popularity);
+// Labels map config
+const effortLabels = {
+  1: '😴 Instant (1/5)',
+  2: '🚶 Easy (2/5)',
+  3: '🧑‍🍳 Medium (3/5)',
+  4: '💪 High Effort (4/5)',
+  5: '🔥 Advanced Cook (5/5)'
+};
+
+const audienceLabels = {
+  'me': '🙋 Me',
+  'roommate': '🤝 Roommate',
+  'both': '👫 Both'
+};
+
+// Initialize Application
+document.addEventListener("DOMContentLoaded", () => {
+  setupEventBindings();
+  loadStateFromURL();
+  fetchAndRenderMeals();
+});
+
+// Sync Interface with state object
+function syncUIFromState() {
+  // 1. Dietary Preference Pills
+  document.querySelectorAll('.diet-pill').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.type === appState.type);
+  });
+
+  // 2. Audience checks
+  document.getElementById('chk-me').checked = appState.who.includes('me');
+  document.getElementById('chk-roommate').checked = appState.who.includes('roommate');
+
+  // 3. Slider Setup
+  const slider = document.getElementById('effortSlider');
+  slider.value = appState.maxEffort;
+  document.getElementById('effortValue').textContent = effortLabels[appState.maxEffort];
+
+  // 4. Hunger selection grids
+  document.querySelectorAll('.hunger-btn').forEach(btn => {
+    btn.classList.toggle('active', appState.hunger.includes(btn.dataset.hunger));
+  });
+
+  // 5. Query Inputs
+  document.getElementById('searchInput').value = appState.searchQuery;
+  document.getElementById('sortSelect').value = appState.sortCriteria;
 }
 
-function isVisible(m) {
-  if (state.type !== 'all' && m.type !== state.type) return false;
-  if (state.who.length === 0) return false;
-  if (m.who !== 'both' && !state.who.includes(m.who)) return false;
-  if (m.effort > state.effort) return false;
-  if (!state.hunger.includes(m.hunger)) return false;
-  if (state.tags.length > 0 && !state.tags.some(t => m.tags.includes(t))) return false;
-  if (state.search) {
-    const q = state.search.toLowerCase();
-    if (!m.name.toLowerCase().includes(q) &&
-        !m.description.toLowerCase().includes(q) &&
-        !m.ingredients.some(i => i.includes(q)) &&
-        !m.tags.some(t => t.includes(q))) return false;
+// Deep State Synchronization via window url parameter encoding
+function updateURLParameters() {
+  const serializedState = btoa(encodeURIComponent(JSON.stringify(appState)));
+  window.location.hash = `menu-state=${serializedState}`;
+}
+
+function loadStateFromURL() {
+  try {
+    const hash = window.location.hash;
+    if (hash && hash.startsWith('#menu-state=')) {
+      const base64Str = hash.replace('#menu-state=', '');
+      const parsedState = JSON.parse(decodeURIComponent(atob(base64Str)));
+      appState = { ...appState, ...parsedState };
+      syncUIFromState();
+    }
+  } catch (err) {
+    console.warn("Could not parse shared link state parameter configuration:", err);
   }
+}
+
+// Algorithmic Scoring Engine Matrix Formula Calculation
+function computeRecommendationScore(meal) {
+  let finalScore = 0;
+
+  // Criterion A: Cooking Effort Constraint Affinity (Max 40 Pts)
+  if (meal.effort <= appState.maxEffort) {
+    finalScore += 40; 
+  } else {
+    // Penalty calculation for crossing target cooking threshold
+    finalScore += Math.max(0, 40 - (meal.effort - appState.maxEffort) * 15);
+  }
+
+  // Criterion B: Multi-User Dietary Compatibility Matrix (Max 30 Pts)
+  if (meal.who === 'both') {
+    finalScore += 30;
+  } else if (appState.who.includes(meal.who)) {
+    finalScore += 25;
+  } else {
+    finalScore += 5; // Low score if it target someone who isn't eating
+  }
+
+  // Criterion C: Current Hunger Alignment Index (Max 20 Pts)
+  if (appState.hunger.includes(meal.hunger)) {
+    finalScore += 20;
+  }
+
+  // Criterion D: Metadata Platform Base Popularity Ratio (Max 10 Pts)
+  finalScore += Math.min(10, meal.popularity || 5);
+
+  return Math.round(finalScore);
+}
+
+// Master Validation Filtering Logic 
+function evaluateVisibility(meal) {
+  // Diet Filter Check
+  if (appState.type !== 'all' && meal.type !== appState.type) return false;
+
+  // Participant Filter Check
+  if (appState.who.length > 0) {
+    if (meal.who !== 'both' && !appState.who.includes(meal.who)) return false;
+  }
+
+  // Hunger Filter Check
+  if (!appState.hunger.includes(meal.hunger)) return false;
+
+  // Selected Tags Cloud Filter Check
+  if (appState.selectedTags.length > 0) {
+    const matchingTag = appState.selectedTags.some(tag => meal.tags.includes(tag));
+    if (!matchingTag) return false;
+  }
+
+  // Fuzzy Search Processing
+  if (appState.searchQuery) {
+    const normalizedQuery = appState.searchQuery.toLowerCase();
+    const matchName = meal.name.toLowerCase().includes(normalizedQuery);
+    const matchDesc = meal.description.toLowerCase().includes(normalizedQuery);
+    const matchIngredients = meal.ingredients.some(i => i.toLowerCase().includes(normalizedQuery));
+    
+    if (!matchName && !matchDesc && !matchIngredients) return false;
+  }
+
   return true;
 }
 
-function sortMeals(list) {
-  const s = state.sort || document.getElementById('sortSelect').value;
-  return [...list].sort((a, b) => {
-    if (s === 'score')      return score(b) - score(a);
-    if (s === 'effort')     return a.effort - b.effort;
-    if (s === 'time')       return a.time - b.time;
-    if (s === 'cost')       return a.cost - b.cost;
-    if (s === 'popularity') return b.popularity - a.popularity;
-    return 0;
+// Async Data Acquisition Pipeline
+async function fetchAndRenderMeals() {
+  const container = document.getElementById('mealsGrid');
+  try {
+    if (mealsData.length === 0) {
+      const response = await fetch('meals.json');
+      mealsData = await response.json();
+      aggregateDynamicTags(mealsData);
+    }
+
+    // Processing filters and calculations
+    let eligibleMeals = mealsData.filter(evaluateVisibility);
+
+    // Apply Sorting logic routines
+    eligibleMeals.sort((alpha, beta) => {
+      if (appState.sortCriteria === 'score') return computeRecommendationScore(beta) - computeRecommendationScore(alpha);
+      if (appState.sortCriteria === 'effort') return alpha.effort - beta.effort;
+      if (appState.sortCriteria === 'time') return alpha.time - beta.time;
+      if (appState.sortCriteria === 'cost') return alpha.cost - beta.cost;
+      if (appState.sortCriteria === 'popularity') return (beta.popularity || 0) - (alpha.popularity || 0);
+      return 0;
+    });
+
+    // Clean loaders and build UI layout view
+    container.classList.remove('skeleton-loading');
+    container.innerHTML = '';
+
+    if (eligibleMeals.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state" style="grid-column: 1/-1; text-align: center; padding: 48px; color: var(--text-muted);">
+          <p style="font-size: 48px;">🍽️</p>
+          <h3 style="margin-top: 16px;">No Meals Found matching filters</h3>
+          <p style="font-size: 13px;">Try adjusting sliders or selecting additional options.</p>
+        </div>`;
+      document.getElementById('resultsCount').textContent = "0 Options found";
+      return;
+    }
+
+    document.getElementById('resultsCount').textContent = `${eligibleMeals.length} Options Available`;
+
+    eligibleMeals.forEach((meal, rank) => {
+      const card = document.createElement('div');
+      const scoreMetric = computeRecommendationScore(meal);
+      const isTopMatch = appState.sortCriteria === 'score' && rank === 0;
+
+      card.className = `meal-card ${isTopMatch ? 'top-match' : ''}`;
+      card.innerHTML = `
+        <div class="card-header-row">
+          <span class="card-emoji">${meal.emoji}</span>
+          <span class="score-badge">${scoreMetric}% Match</span>
+        </div>
+        <div>
+          <h3 class="meal-title">
+            <span class="diet-indicator ${meal.type}"></span>
+            ${meal.name}
+          </h3>
+          <p class="meal-desc">${meal.description}</p>
+        </div>
+        <div class="meal-meta-row">
+          <span class="meta-tag">⚡ Effort: ${meal.effort}/5</span>
+          <span class="meta-tag">⏱️ ${meal.time}m</span>
+          <span class="meta-tag">💰 ₹${meal.cost}</span>
+          <span class="meta-tag">${audienceLabels[meal.who] || meal.who}</span>
+        </div>
+      `;
+      card.addEventListener('click', () => openMealDetails(meal));
+      container.appendChild(card);
+    });
+
+  } catch (error) {
+    console.error("Data ingestion pipeline fault:", error);
+    container.innerHTML = `<div style="grid-column:1/-1; color:var(--red);">Error parsing meals database configuration resource.</div>`;
+  }
+}
+
+// Dynamic Tag Aggregator Pipeline Routine 
+function aggregateDynamicTags(data) {
+  const dynamicTagMap = new Set();
+  data.forEach(item => {
+    if (item.tags && Array.isArray(item.tags)) {
+      item.tags.forEach(t => dynamicTagMap.add(t));
+    }
+  });
+
+  const tagContainer = document.getElementById('dynamicTags');
+  tagContainer.innerHTML = '';
+
+  Array.from(dynamicTagMap).sort().forEach(tag => {
+    const chip = document.createElement('span');
+    chip.className = `tag-chip ${appState.selectedTags.includes(tag) ? 'selected' : ''}`;
+    chip.textContent = `#${tag}`;
+    chip.addEventListener('click', () => {
+      if (appState.selectedTags.includes(tag)) {
+        appState.selectedTags = appState.selectedTags.filter(item => item !== tag);
+      } else {
+        appState.selectedTags.push(tag);
+      }
+      chip.classList.toggle('selected');
+      updateURLParameters();
+      fetchAndRenderMeals();
+    });
+    tagContainer.appendChild(chip);
   });
 }
 
-function effortLabel(n) {
-  return ['', '😴 Instant', '🚶 Easy', '🧑‍🍳 Medium', '💪 Effort', '🔥 Full Cook'][n];
-}
-
-function whoLabel(w) {
-  return w === 'both' ? '👫 Both' : w === 'me' ? '🙋 Me' : '🤝 Roommate';
-}
-
-function whoClass(w) {
-  return w === 'both' ? 'who-both' : w === 'me' ? 'who-me' : 'who-roommate';
-}
-
-function renderCard(m, rank) {
-  const sc = score(m);
-  const pct = sc;
-  return `
-  <div class="meal-card ${rank === 0 ? 'winner' : ''}" onclick="openMeal(${m.id})">
-    ${rank === 0 ? '<div class="winner-badge">⭐ Best Pick</div>' : ''}
-    <div class="card-top">
-      <div class="card-emoji">${m.emoji}</div>
-      <div class="card-info">
-        <div class="card-name">${m.name}</div>
-        <div class="card-desc">${m.description}</div>
-      </div>
-      <div class="veg-dot ${m.type}"></div>
-    </div>
-    <div class="card-meta">
-      <span class="meta-chip effort">⚡ ${effortLabel(m.effort)}</span>
-      <span class="meta-chip time">⏱ ${m.time}m</span>
-      <span class="meta-chip ${whoClass(m.who)}">${whoLabel(m.who)}</span>
-    </div>
-    <div class="card-tags">
-      ${m.tags.slice(0, 3).map(t => `<span class="tag">#${t}</span>`).join('')}
-    </div>
-    <div class="score-bar-wrap">
-      <div class="score-bar-bg"><div class="score-bar-fill" style="width:${pct}%"></div></div>
-      <span class="score-num">${sc}</span>
-    </div>
-  </div>`;
-}
-
-function applyFilters() {
-  state.search = document.getElementById('searchInput').value;
-  state.sort = document.getElementById('sortSelect').value;
-  const grid = document.getElementById('cardsGrid');
-  const visible = sortMeals(meals.filter(isVisible));
-  document.getElementById('countNum').textContent = visible.length;
-  if (visible.length === 0) {
-    grid.innerHTML = `<div class="empty">
-      <div class="empty-emoji">🤷</div>
-      <div class="empty-title">No meals match</div>
-      <div class="empty-sub">Try relaxing your filters — maybe increase effort or hunger level.</div>
-    </div>`;
+// Interactive Cinematic Casino Roulette Decide Engine Routine
+function executeRouletteDecide() {
+  const eligibleChoices = mealsData.filter(evaluateVisibility);
+  if (eligibleChoices.length === 0) {
+    showToast("No options available under current filters!");
     return;
   }
-  grid.innerHTML = visible.map((m, i) => renderCard(m, i)).join('');
-  updateActiveFilters();
-}
 
-function buildTagBar() {
-  const allTags = [...new Set(meals.flatMap(m => m.tags))].sort();
-  const bar = document.getElementById('tagBar');
-  bar.innerHTML = allTags.map(t =>
-    `<span class="tag-chip ${state.tags.includes(t) ? 'active' : ''}" onclick="toggleTag('${t}')">#${t}</span>`
-  ).join('');
-}
+  const overlay = document.getElementById('rouletteModal');
+  const strip = document.getElementById('rouletteStrip');
+  overlay.classList.add('open');
+  strip.innerHTML = '';
 
-function toggleTag(tag) {
-  if (state.tags.includes(tag)) {
-    state.tags = state.tags.filter(t => t !== tag);
-  } else {
-    state.tags.push(tag);
+  // Generate continuous layout items array list loop options
+  const animationPool = [];
+  for (let cycle = 0; cycle < 6; cycle++) {
+    eligibleChoices.forEach(dish => animationPool.push(dish));
   }
-  buildTagBar();
-  applyFilters();
-}
 
-function setType(el, val) {
-  state.type = val;
-  document.querySelectorAll('[data-filter="type"]').forEach(p => {
-    p.classList.remove('active', 'veg', 'nonveg');
-    if (p === el) p.classList.add('active');
-    if (p.dataset.val === 'veg') p.classList.add('veg');
-    if (p.dataset.val === 'nonveg') p.classList.add('nonveg');
+  // Shuffle pick selection index target final index choice target position
+  const chosenIndex = Math.floor(Math.random() * eligibleChoices.length) + (eligibleChoices.length * 4);
+  const targetWinner = animationPool[chosenIndex];
+
+  // Render nodes list inside timeline track strip
+  animationPool.forEach(dish => {
+    const node = document.createElement('div');
+    node.className = 'roulette-item';
+    node.innerHTML = `<span>${dish.emoji}</span><small>${dish.name}</small>`;
+    strip.appendChild(node);
   });
-  applyFilters();
+
+  // Calculate pixel displacement position target calculation offset values
+  const stepHeight = 120; 
+  strip.style.transition = 'none';
+  strip.style.transform = 'translateY(0)';
+
+  // Enforce engine rendering recalculation step cycle
+  setTimeout(() => {
+    strip.style.transition = 'transform 3.5s cubic-bezier(0.1, 1, 0.1, 1)';
+    const travelDistance = chosenIndex * stepHeight;
+    strip.style.transform = `translateY(-${travelDistance}px)`;
+  }, 50);
+
+  // Spotlight display execution routine step termination event callback
+  setTimeout(() => {
+    overlay.classList.remove('open');
+    openMealDetails(targetWinner);
+  }, 3900);
 }
 
-function toggleWho(who) {
-  const el = document.getElementById('check-' + who);
-  if (state.who.includes(who)) {
-    if (state.who.length > 1) {
-      state.who = state.who.filter(w => w !== who);
-      el.classList.remove('active');
-      el.querySelector('.check-box').textContent = '';
-    }
-  } else {
-    state.who.push(who);
-    el.classList.add('active');
-    el.querySelector('.check-box').textContent = '✓';
-  }
-  applyFilters();
-}
+// Modal management routines
+function openMealDetails(meal) {
+  document.getElementById('mEmoji').textContent = meal.emoji;
+  document.getElementById('mName').textContent = meal.name;
+  document.getElementById('mDescription').textContent = meal.description;
+  document.getElementById('mEffort').textContent = `${meal.effort}/5`;
+  document.getElementById('mTime').textContent = `${meal.time} mins`;
+  document.getElementById('mCost').textContent = `₹${meal.cost}`;
+  document.getElementById('mWho').textContent = audienceLabels[meal.who] || meal.who;
 
-function updateEffort(val) {
-  state.effort = parseInt(val);
-  document.getElementById('effortVal').textContent = `${val} / 5`;
-  applyFilters();
-}
+  const dot = document.getElementById('mTypeBadge');
+  dot.className = `veg-dot ${meal.type}`;
 
-function setHunger(el, val) {
-  if (state.hunger.includes(val)) {
-    if (state.hunger.length > 1) {
-      state.hunger = state.hunger.filter(h => h !== val);
-      el.classList.remove('active');
-    }
-  } else {
-    state.hunger.push(val);
-    el.classList.add('active');
-  }
-  applyFilters();
-}
+  // Ingredients rendering
+  const ingContainer = document.getElementById('mIngredients');
+  ingContainer.innerHTML = meal.ingredients.map(i => `<span class="ingredient-chip">${i}</span>`).join('');
 
-function updateActiveFilters() {
-  const wrap = document.getElementById('activeFilters');
-  const chips = [];
-  if (state.type !== 'all') chips.push({
-    label: state.type === 'veg' ? '🟢 Veg Only' : '🔴 Non-Veg Only',
-    clear: () => { state.type = 'all'; document.querySelector('[data-val="all"]').click(); }
-  });
-  if (state.effort < 5) chips.push({
-    label: `⚡ Max effort ${state.effort}`,
-    clear: () => { document.getElementById('effortSlider').value = 5; updateEffort(5); }
-  });
-  state.tags.forEach(t => chips.push({ label: `#${t}`, clear: () => toggleTag(t) }));
-  wrap.innerHTML = chips.map((c, i) =>
-    `<div class="filter-pill" onclick="clearFilter(${i})">✕ ${c.label}</div>`
-  ).join('');
-  wrap._clearFns = chips.map(c => c.clear);
-}
+  // Tags rendering
+  const tagsContainer = document.getElementById('mTags');
+  tagsContainer.innerHTML = meal.tags.map(t => `<span class="tag-chip">#${t}</span>`).join('');
 
-function clearFilter(i) {
-  document.getElementById('activeFilters')._clearFns[i]();
-}
-
-function resetFilters() {
-  state = { type: 'all', who: ['me', 'roommate'], effort: 5, hunger: ['snack', 'light', 'meal', 'outside'], tags: [], search: '', sort: 'score' };
-  document.getElementById('effortSlider').value = 5;
-  document.getElementById('effortVal').textContent = '5 / 5';
-  document.getElementById('searchInput').value = '';
-  document.getElementById('sortSelect').value = 'score';
-  document.querySelector('[data-val="all"]').classList.add('active');
-  document.querySelector('[data-val="veg"]').classList.remove('active');
-  document.querySelector('[data-val="nonveg"]').classList.remove('active');
-  ['me', 'roommate'].forEach(w => {
-    document.getElementById('check-' + w).classList.add('active');
-    document.getElementById('check-' + w).querySelector('.check-box').textContent = '✓';
-  });
-  document.querySelectorAll('.hunger-card').forEach(c => c.classList.add('active'));
-  buildTagBar();
-  applyFilters();
-}
-
-function decideForMe() {
-  const visible = sortMeals(meals.filter(isVisible));
-  if (visible.length === 0) { alert('No meals match your filters! Try relaxing them first.'); return; }
-  const top5 = visible.slice(0, Math.min(5, visible.length));
-  const pick = top5[Math.floor(Math.random() * top5.length)];
-  const sc = score(pick);
-  document.getElementById('diceEmoji').textContent = pick.emoji;
-  document.getElementById('decidePick').textContent = pick.name;
-  document.getElementById('decideScore').textContent = `Match Score: ${sc}/100 — ${pick.description}`;
-  document.getElementById('decideCardWrap').innerHTML = renderCard(pick, -1).replace('onclick="openMeal(', 'style="cursor:default" onclick="void(0);//');
-  document.getElementById('decideModal').classList.add('open');
-}
-
-function openMeal(id) {
-  const m = meals.find(x => x.id === id);
-  if (!m) return;
-  document.getElementById('mEmoji').textContent = m.emoji;
-  document.getElementById('mName').textContent = m.name;
-  document.getElementById('mDesc').textContent = m.description;
-  document.getElementById('mTime').textContent = m.time;
-  document.getElementById('mCost').textContent = '₹' + m.cost;
-  document.getElementById('mEffort').textContent = m.effort + '/5';
-  document.getElementById('mIngredients').innerHTML = m.ingredients.map(i => `<span class="ingredient">${i}</span>`).join('');
-  document.getElementById('mTags').innerHTML = m.tags.map(t => `<span class="tag">#${t}</span>`).join('');
   document.getElementById('mealModal').classList.add('open');
-}
-
-function closeModal(e) {
-  if (e.target.classList.contains('modal-overlay')) closeAllModals();
 }
 
 function closeAllModals() {
   document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('open'));
 }
 
-function toggleSidebar() {
-  document.getElementById('sidebar').classList.toggle('open');
-  document.getElementById('sidebarOverlay').classList.toggle('open');
+function showToast(msg) {
+  const element = document.getElementById('toast');
+  element.textContent = msg;
+  element.classList.add('show');
+  setTimeout(() => element.classList.remove('show'), 2500);
 }
 
-document.getElementById('sidebarOverlay').addEventListener('click', () => {
-  document.getElementById('sidebar').classList.remove('open');
-  document.getElementById('sidebarOverlay').classList.remove('open');
-});
+// Event Bindings and Interactive Subsystems Hooks
+function setupEventBindings() {
+  // 1. Diet Selection Switches
+  document.querySelectorAll('.diet-pill').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      appState.type = e.target.dataset.type;
+      document.querySelectorAll('.diet-pill').forEach(b => b.classList.remove('active'));
+      e.target.classList.add('active');
+      updateURLParameters();
+      fetchAndRenderMeals();
+    });
+  });
 
-// Theme toggle
-const themeBtn = document.getElementById('themeBtn');
-let dark = true;
-themeBtn.addEventListener('click', () => {
-  dark = !dark;
-  document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
-  themeBtn.textContent = dark ? '🌙' : '☀️';
-});
+  // 2. Audience checks changes hooks
+  const updateAudienceState = () => {
+    const list = [];
+    if (document.getElementById('chk-me').checked) list.push('me');
+    if (document.getElementById('chk-roommate').checked) list.push('roommate');
+    appState.who = list;
+    updateURLParameters();
+    fetchAndRenderMeals();
+  };
+  document.getElementById('chk-me').addEventListener('change', updateAudienceState);
+  document.getElementById('chk-roommate').addEventListener('change', updateAudienceState);
 
-// Load meals from JSON
-async function loadMeals() {
-  try {
-    const r = await fetch('meals.json');
-    meals = await r.json();
-  } catch {
-    console.error('Could not load meals.json — make sure it is in the same folder as index.html');
-    meals = [];
-  }
-  buildTagBar();
-  applyFilters();
+  // 3. Slider Hooks
+  const rangeInput = document.getElementById('effortSlider');
+  rangeInput.addEventListener('input', (e) => {
+    const val = parseInt(e.target.value);
+    appState.maxEffort = val;
+    document.getElementById('effortValue').textContent = effortLabels[val];
+    updateURLParameters();
+    fetchAndRenderMeals();
+  });
+
+  // 4. Hunger Level Buttons
+  document.querySelectorAll('.hunger-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const targetCard = e.currentTarget;
+      const type = targetCard.dataset.hunger;
+      if (appState.hunger.includes(type)) {
+        appState.hunger = appState.hunger.filter(item => item !== type);
+      } else {
+        appState.hunger.push(type);
+      }
+      targetCard.classList.toggle('active');
+      updateURLParameters();
+      fetchAndRenderMeals();
+    });
+  });
+
+  // 5. Query Search processing field hooks
+  let searchDebounceTimer;
+  document.getElementById('searchInput').addEventListener('input', (e) => {
+    clearTimeout(searchDebounceTimer);
+    searchDebounceTimer = setTimeout(() => {
+      appState.searchQuery = e.target.value;
+      updateURLParameters();
+      fetchAndRenderMeals();
+    }, 250);
+  });
+
+  // 6. Selection sort change events hook
+  document.getElementById('sortSelect').addEventListener('change', (e) => {
+    appState.sortCriteria = e.target.value;
+    updateURLParameters();
+    fetchAndRenderMeals();
+  });
+
+  // 7. Decide button hook
+  document.getElementById('decideBtn').addEventListener('click', executeRouletteDecide);
+
+  // 8. Reset Button action
+  document.getElementById('resetFilters').addEventListener('click', () => {
+    appState = {
+      type: 'all', who: ['me', 'roommate'], maxEffort: 3,
+      hunger: ['snack', 'light', 'meal', 'outside'], selectedTags: [], searchQuery: '', sortCriteria: 'score'
+    };
+    syncUIFromState();
+    if (mealsData.length > 0) aggregateDynamicTags(mealsData);
+    updateURLParameters();
+    fetchAndRenderMeals();
+  });
+
+  // 9. Mobile Sidebar Drawer Toggles Hooks
+  const toggleSidebar = () => {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebarOverlay').classList.toggle('open');
+  };
+  document.getElementById('mobileFilterToggle').addEventListener('click', toggleSidebar);
+  document.getElementById('sidebarOverlay').addEventListener('click', toggleSidebar);
+
+  // 10. Global Link Share Engine Clipboard Routine hook
+  document.getElementById('shareBtn').addEventListener('click', () => {
+    navigator.clipboard.writeText(window.location.href)
+      .then(() => showToast("🔗 Shareable layout parameters copied to clipboard!"))
+      .catch(() => showToast("Failed to copy link automatically."));
+  });
+
+  // 11. Theme Switcher Routine Node click hook
+  const themeToggle = document.getElementById('themeBtn');
+  themeToggle.addEventListener('click', () => {
+    const docRoot = document.documentElement;
+    const currentTheme = docRoot.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    docRoot.setAttribute('data-theme', newTheme);
+    themeToggle.textContent = newTheme === 'dark' ? '🌙' : '☀️';
+  });
+
+  // 12. Modal backdrop close handler click
+  document.querySelectorAll('.modal-overlay').forEach(m => {
+    m.addEventListener('click', (e) => {
+      if (e.target === m) closeAllModals();
+    });
+  });
 }
-
-loadMeals();
