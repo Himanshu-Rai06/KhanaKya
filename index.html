@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KhanaKya? — What's For Dinner</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,500&amp;family=DM+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="theme-both">
+
+  <header class="top-header">
+    <h1 class="logo">Khana<span>Kya?</span></h1>
+    <p class="logo-tagline">What Are We Eating Today</p>
+  </header>
+
+  <section class="filters-bar" id="filtersBar">
+
+    <!-- Names: dropdown -->
+    <div class="name-dropdown-wrap" id="nameDropdownWrap">
+      <button class="name-dropdown-trigger has-active" id="nameDropdownTrigger">
+        <span id="nameLabel">Both</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 9l6 6 6-6"/>
+        </svg>
+      </button>
+      <div class="name-dropdown-panel" id="nameDropdownPanel">
+        <div class="name-option selected" data-name="himanshu" id="option-himanshu">
+          <span class="check-box">
+            <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M2 6l3 3 5-5"/>
+            </svg>
+          </span>
+          Himanshu
+        </div>
+        <div class="name-option selected" data-name="swapnil" id="option-swapnil">
+          <span class="check-box">
+            <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M2 6l3 3 5-5"/>
+            </svg>
+          </span>
+          Swapnil
+        </div>
+      </div>
+    </div>
+
+    <div class="bar-divider"></div>
+
+    <!-- Dice (random) + Reset -->
+    <div class="icon-btns">
+      <button class="icon-btn random-btn" id="btn-random" title="Pick random">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="2" width="20" height="20" rx="3.5"/>
+          <circle cx="8"  cy="8"  r="1.3" fill="currentColor" stroke="none"/>
+          <circle cx="16" cy="8"  r="1.3" fill="currentColor" stroke="none"/>
+          <circle cx="8"  cy="16" r="1.3" fill="currentColor" stroke="none"/>
+          <circle cx="16" cy="16" r="1.3" fill="currentColor" stroke="none"/>
+          <circle cx="12" cy="12" r="1.3" fill="currentColor" stroke="none"/>
+        </svg>
+      </button>
+      <button class="icon-btn clear-btn" id="btn-clear" title="Reset filters">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+          <path d="M3 3v5h5"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="bar-divider"></div>
+
+    <!-- Effort Slider -->
+    <div class="slider-wrap">
+      <span class="slider-label">Effort <strong id="effortLabel">Medium</strong></span>
+      <input type="range" id="effortSlider" min="1" max="5" value="3" step="1">
+    </div>
+
+    <div class="bar-divider"></div>
+
+    <!-- Diet toggle: FSSAI icons, pushed right -->
+    <div class="diet-toggle">
+      <button class="diet-btn veg-btn active" id="diet-veg" title="Vegetarian only">
+        <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="1.5" y="1.5" width="17" height="17" rx="2" stroke="#2D8B3A" stroke-width="2"/>
+          <circle cx="10" cy="10" r="5.5" fill="#2D8B3A"/>
+        </svg>
+      </button>
+      <button class="diet-btn nonveg-btn active" id="diet-nonveg" title="Non-Vegetarian only">
+        <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="1.5" y="1.5" width="17" height="17" rx="2" stroke="#C0302A" stroke-width="2"/>
+          <circle cx="10" cy="10" r="5.5" fill="#C0302A"/>
+        </svg>
+      </button>
+    </div>
+
+  </section>
+
+  <main class="menu-feed">
+    <section class="meal-category" id="category-snacks">
+      <div class="category-header"><h2>Snacks</h2><span class="item-count">—</span></div>
+      <div class="meals-grid" id="grid-snacks">
+        <div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div>
+      </div>
+    </section>
+    <section class="meal-category" id="category-light">
+      <div class="category-header"><h2>Light Meal</h2><span class="item-count">—</span></div>
+      <div class="meals-grid" id="grid-light">
+        <div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div>
+      </div>
+    </section>
+    <section class="meal-category" id="category-proper">
+      <div class="category-header"><h2>Proper Meal</h2><span class="item-count">—</span></div>
+      <div class="meals-grid" id="grid-proper">
+        <div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div>
+      </div>
+    </section>
+    <section class="meal-category" id="category-outside">
+      <div class="category-header"><h2>Outside</h2><span class="item-count">—</span></div>
+      <div class="meals-grid" id="grid-outside">
+        <div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Scroll-to-top progress ring -->
+  <div class="progress-wrap" id="progressWrap" title="Back to top">
+    <svg class="progress-circle" viewBox="0 0 44 44">
+      <circle cx="22" cy="22" r="19" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="2.5"/>
+      <path id="progressPath" d="M 22 3 A 19 19 0 0 1 22 41 A 19 19 0 0 1 22 3"/>
+    </svg>
+    <div class="progress-inner">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M18 15l-6-6-6 6"/>
+      </svg>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
